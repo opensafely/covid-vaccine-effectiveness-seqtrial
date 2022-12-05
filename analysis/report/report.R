@@ -15,7 +15,7 @@ source(here("lib", "functions", "utility.R"))
 
 
 # where are the outputs (ie the inputs for this manuscript!) saved?
-output_dir_os <- here("release")
+output_dir_os <- here("release20221205")
 
 
 
@@ -249,7 +249,7 @@ cox_cuts_MA <-
     outcome %in% c("postest", "covidadmitted", "death")
   ) %>%
   mutate(
-    period_end = if_else(period_end>35, 63, period_end),
+    period_end = if_else(period_end>35, 42, period_end),
     midpoint = (period_end+period_start)/2,
   ) %>%
   mutate(across(approach, factor, levels = c("msm", "st"), labels = c("Single trial", "Sequential trial"))) %>%
@@ -296,13 +296,18 @@ formatpercent100 <- function(x,accuracy){
   )
 }
 
+shape_palette <- c(17,19)
+names(shape_palette) <- c("Single trial", "Sequential trial")
+
+dodge_width <- 2.5
+
 effect_plot <-
   cox_cuts_MA %>%
-  ggplot(aes(colour=approach)) +
+  ggplot(aes(colour=approach, shape=approach)) +
   geom_hline(aes(yintercept=1), colour='black')+
   geom_vline(aes(xintercept=0), colour='black')+
-  geom_point(aes(y=hr, x=midpoint), position = position_dodge(width = 2), size=0.8)+
-  geom_linerange(aes(ymin=conf.low, ymax=conf.high, x=midpoint), position = position_dodge(width = 2))+
+  geom_point(aes(y=hr, x=midpoint), position = position_dodge(width = dodge_width), size=2, alpha=0.6)+
+  geom_linerange(aes(ymin=conf.low, ymax=conf.high, x=midpoint), position = position_dodge(width = dodge_width))+
   facet_grid(rows=vars(outcome_descr), cols=vars(brand), switch="y")+
   scale_y_log10(
     breaks = c(0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5),
@@ -317,17 +322,34 @@ effect_plot <-
   )+
   scale_x_continuous(
     breaks = c(0,postbaselinecuts),
-    expand = expansion(mult=c(0), add=c(0,7)), limits=c(0,NA)
+    expand = expansion(mult=c(0), add=c(0,4)), limits=c(0,NA)
   )+
-  scale_colour_brewer(type="qual", palette="Set2", guide=guide_legend(ncol=2))+
+  scale_colour_brewer(
+    name=NULL,
+    type="qual", 
+    palette="Set2", 
+    guide=guide_legend(ncol=2)
+    )+
+  scale_shape_manual(
+    name = NULL,
+    values = shape_palette
+    ) +
+  guides(
+    colour = guide_legend(
+      title=NULL,
+      override.aes = list(shape = shape_palette)
+      )
+  ) +
   coord_cartesian() +
   labs(
     y="Hazard ratio, versus no vaccination",
-    x="Days since first dose",
-    colour=NULL
+    x="Days since first dose"
   ) +
-  theme_bw(base_size=12)+
+   
   theme(
+    
+    axis.ticks = element_blank(),
+    
     panel.border = element_blank(),
     
     panel.grid.minor.x = element_blank(),
