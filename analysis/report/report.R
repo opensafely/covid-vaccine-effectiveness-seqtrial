@@ -483,9 +483,6 @@ plot_coverage_cumuln <-
       TRUE ~ NA_character_
     )
   ) %>%
-  # group_by(brand, vax1_date) %>%
-  # mutate(across(cumuln, ~if_else(status == "unmatched", sum(cumuln), cumuln))) %>%
-  # ungroup() %>%
   ggplot()+
   geom_area(aes(
     x=vax1_date+0.5, 
@@ -524,7 +521,7 @@ plot_coverage_cumuln <-
   scale_alpha_discrete(range= c(0.9,0.4))+
   labs(
     x="Date",
-    y="Cumulative count",
+    y="Cumulative count per day",
     colour=NULL,
     fill=NULL,
     alpha=NULL
