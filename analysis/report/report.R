@@ -392,80 +392,86 @@ data_coverage <- brands %>%
 xmin <- min(data_coverage$vax1_date )
 xmax <- max(data_coverage$vax1_date )+1
 
-# daily numbers
-plot_coverage_n <-
-  data_coverage %>%
-  mutate(
-    brand = case_when(
-      brand == "pfizer" ~ "BNT162b2",
-      brand == "az" ~ "ChAdOx1",
-      TRUE ~ NA_character_
-    ),
-  ) %>%
-  ggplot()+
-  geom_col(
-    aes(
-      x=vax1_date+0.5,
-      y=n,
-      group=paste0(brand,status),
-      fill=brand,
-      alpha=fct_rev(status),
-      colour=NULL
-    ),
-    position=position_stack(reverse=TRUE),
-    #alpha=0.8,
-    width=1
-  )+
-  #geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
-  geom_hline(yintercept = 0, colour="black")+
-  facet_grid(rows = "brand")+
-  scale_x_date(
-    breaks = unique(lubridate::ceiling_date(data_coverage$vax1_date, "1 month")),
-    limits = c(xmin-1, NA),
-    labels = scales::label_date("%d/%m"),
-    expand = expansion(add=1),
-  )+
-  scale_y_continuous(
-    labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.x)),
-    expand = expansion(c(0, NA))
-  )+
-  scale_fill_brewer(type="qual", palette="Set2")+
-  scale_colour_brewer(type="qual", palette="Set2")+
-  scale_alpha_discrete(range= c(0.8,0.4))+
-  labs(
-    x="Date",
-    y="Count",
-    colour=NULL,
-    fill=NULL,
-    alpha=NULL
-  ) +
-  theme_bw()+
-  theme(
-    
-    panel.border = element_blank(),
-    
-    panel.grid.minor.x = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    strip.background = element_blank(),
-    strip.placement = "outside",
-    
-    panel.spacing = unit(1, "lines"),
-    
-    axis.title.y = element_text(margin = margin(t=0,r=10,b=0,l=0)),
-    axis.title.x = element_text(margin = margin(t=10,r=0,b=0,l=0)),
-    
-    axis.line.x.bottom = element_line(),
-    axis.text.x.top=element_text(hjust=0),
-    strip.text.y.right = element_text(angle = 0),
-    axis.ticks.x=element_line(),
-    legend.position = "bottom"
-  )
+# # daily numbers
+# plot_coverage_n <-
+#   data_coverage %>%
+#   mutate(
+#     brand = case_when(
+#       brand == "pfizer" ~ "BNT162b2",
+#       brand == "az" ~ "ChAdOx1",
+#       TRUE ~ NA_character_
+#     ),
+#   ) %>%
+#   ggplot()+
+#   geom_col(
+#     aes(
+#       x=vax1_date+0.5,
+#       y=n,
+#       group=paste0(brand,status),
+#       fill=brand,
+#       alpha=fct_rev(status),
+#       colour=NULL
+#     ),
+#     position=position_stack(reverse=TRUE),
+#     #alpha=0.8,
+#     width=1
+#   )+
+#   #geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
+#   geom_hline(yintercept = 0, colour="black")+
+#   facet_grid(rows = "brand")+
+#   scale_x_date(
+#     breaks = unique(lubridate::ceiling_date(data_coverage$vax1_date, "1 month")),
+#     limits = c(xmin-1, NA),
+#     labels = scales::label_date("%d/%m"),
+#     expand = expansion(add=1),
+#   )+
+#   scale_y_continuous(
+#     labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.x)),
+#     expand = expansion(c(0, NA))
+#   )+
+#   scale_fill_brewer(type="qual", palette="Set2")+
+#   scale_colour_brewer(type="qual", palette="Set2")+
+#   scale_alpha_discrete(range= c(0.8,0.4))+
+#   labs(
+#     x="Date",
+#     y="Count",
+#     colour=NULL,
+#     fill=NULL,
+#     alpha=NULL
+#   ) +
+#   theme_bw()+
+#   theme(
+#     
+#     panel.border = element_blank(),
+#     
+#     panel.grid.minor.x = element_blank(),
+#     panel.grid.minor.y = element_blank(),
+#     strip.background = element_blank(),
+#     strip.placement = "outside",
+#     
+#     panel.spacing = unit(1, "lines"),
+#     
+#     axis.title.y = element_text(margin = margin(t=0,r=10,b=0,l=0)),
+#     axis.title.x = element_text(margin = margin(t=10,r=0,b=0,l=0)),
+#     
+#     axis.line.x.bottom = element_line(),
+#     axis.text.x.top=element_text(hjust=0),
+#     strip.text.y.right = element_text(angle = 0),
+#     axis.ticks.x=element_line(),
+#     legend.position = "bottom"
+#   )
+# 
+# ggsave(
+#   filename=file.path(output_dir_os, "coverage_n.png"),
+#   plot_coverage_n,
+#   width=15, height=20, units="cm"
+# )  
 
-ggsave(
-  filename=file.path(output_dir_os, "coverage_n.png"),
-  plot_coverage_n,
-  width=15, height=20, units="cm"
-)  
+
+colour_palette <- c(
+  "BNT162b2" = "#e78ac3",
+  "ChAdOx1" = "#8da0cb"
+)
 
 # cumulative numbers
 plot_coverage_cumuln <-
@@ -475,22 +481,33 @@ plot_coverage_cumuln <-
       brand == "pfizer" ~ "BNT162b2",
       brand == "az" ~ "ChAdOx1",
       TRUE ~ NA_character_
-    ),
+    )
   ) %>%
+  # group_by(brand, vax1_date) %>%
+  # mutate(across(cumuln, ~if_else(status == "unmatched", sum(cumuln), cumuln))) %>%
+  # ungroup() %>%
   ggplot()+
-  geom_col(
-    aes(
-      x=vax1_date+0.5,
-      y=cumuln,
-      group=paste0(brand,status),
-      fill=brand,
-      alpha=fct_rev(status),
-      colour=NULL
-    ),
-    position=position_stack(reverse=TRUE),
-    width=1
+  geom_area(aes(
+    x=vax1_date+0.5, 
+    y=cumuln,
+    group=paste0(brand,status),
+    fill=brand,
+    alpha=fct_rev(status)
+  ),
+  position=position_stack(reverse=TRUE)
   )+
-  geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
+  # geom_col(
+  #   aes(
+  #     x=vax1_date+0.5,
+  #     y=cumuln,
+  #     group=paste0(brand,status),
+  #     fill=brand,
+  #     alpha=fct_rev(status),
+  #     colour=NULL
+  #   ),
+  #   position=position_stack(reverse=TRUE),
+  #   width=1
+  # )+
   facet_grid(rows = "brand")+
   scale_x_date(
     breaks = unique(lubridate::ceiling_date(data_coverage$vax1_date, "1 month")),
@@ -502,11 +519,9 @@ plot_coverage_cumuln <-
     labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.)),
     expand = expansion(c(0, NA))
   )+
-  #scale_fill_brewer(type="qual", palette="Set2")+
-  #scale_colour_brewer(type="qual", palette="Set2")+
-  scale_fill_manual(values = brewer_pal(type="qual", palette="Set2")(3)[c(3,1)])+
-  scale_colour_manual(values = brewer_pal(type="qual", palette="Set2")(3)[c(3,1)])+
-  scale_alpha_discrete(range= c(0.8,0.4))+
+  scale_fill_manual(values = colour_palette)+
+  scale_colour_manual(values = colour_palette)+
+  scale_alpha_discrete(range= c(0.9,0.4))+
   labs(
     x="Date",
     y="Cumulative count",
@@ -531,7 +546,6 @@ plot_coverage_cumuln <-
     
     axis.line.x.bottom = element_line(),
     axis.text.x.top=element_text(hjust=0),
-    #strip.text.y.right = element_text(angle = 0),
     strip.text.y.right = element_blank(),
     axis.ticks.x=element_line(),
     legend.position = "bottom"
