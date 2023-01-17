@@ -1,7 +1,6 @@
 # Single trial vs sequential trial approaches for estimating COVID-19 vaccine effectiveness 
 
-This is the code and configuration for the paper entitled "Challenges in estimating the effectiveness of COVID-19 vaccination
-using observational data". This paper compares two approaches to target trial emulation for estimating COVID-19 vaccine effectiveness: the single trial approach and the sequential trial approach.
+🚨 This repo is archived, the code for this project has moved to [covid-vaccine-effectiveness-sequential-vs-single](https://github.com/opensafely/covid-vaccine-effectiveness-sequential-vs-single) 🚨
 
 You can run this project via [Gitpod](https://gitpod.io) in a web browser by clicking on this badge: [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/opensafely/covid-vaccine-effectiveness-seqtrial)
 
